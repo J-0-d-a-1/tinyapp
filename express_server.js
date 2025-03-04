@@ -66,10 +66,16 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${newId}`);
 });
 
-// to remove a URL from post
+// to remove a URL from post /urls/:id/delete
 app.post("/urls/:id/delete", (req, res) => {
-  // find the url of index that matches with selected id
   delete urlDatabase[req.params.id];
+  res.redirect("/urls");
+});
+
+// to edit a url from /urls/:id/edit
+app.post("/urls/:id/edit", (req, res) => {
+  console.log(req.body);
+  urlDatabase[req.params.id] = req.body[req.params.id];
   res.redirect("/urls");
 });
 
