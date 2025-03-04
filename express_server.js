@@ -63,7 +63,7 @@ app.post("/urls", (req, res) => {
   console.log(req.body); // Log the POST request body to the console
   const newId = generateRandomString();
   urlDatabase[newId] = req.body.longURL;
-  res.render(`/urls/${newId}`);
+  res.redirect(`/urls/${newId}`);
 });
 
 app.listen(PORT, () => {
