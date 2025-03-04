@@ -44,6 +44,12 @@ app.get("/urls/:id", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
+// rout for shareable short url of redirection (/u/:id)
+app.get("/u/:id", (req, res) => {
+  const longURL = urlDatabase[req.params.id];
+  res.redirect(longURL);
+});
+
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
@@ -57,8 +63,7 @@ app.post("/urls", (req, res) => {
   console.log(req.body); // Log the POST request body to the console
   const newId = generateRandomString();
   urlDatabase[newId] = req.body.longURL;
-  const templateVars = { id: newId, longURL: urlDatabase[req.params.id] };
-  res.render("urls_show", templateVars);
+  res.render(`/urls/${newId}`);
 });
 
 app.listen(PORT, () => {
