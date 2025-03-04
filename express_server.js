@@ -66,6 +66,18 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${newId}`);
 });
 
+// to remove a URL from post
+app.post("/urls/:id/delete", (req, res) => {
+  // find the url of index that matches with selected id
+  const urlIds = Object.keys(urlDatabase);
+  for (let urlId of urlIds) {
+    if (urlId === req.params.id) {
+      delete urlDatabase[urlId];
+    }
+  }
+  res.redirect("/urls");
+});
+
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}`);
 });
