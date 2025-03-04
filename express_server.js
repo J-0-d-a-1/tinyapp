@@ -11,10 +11,10 @@ const urlDatabase = {
 };
 
 // returns a string of 6 random alphanumeric characthers
-function generateRandomString() {
+const generateRandomString = function () {
   const random6Letters = Math.random().toString(36).slice(2, 8);
   return random6Letters;
-}
+};
 
 // getting ready for the POST
 app.use(express.urlencoded({ extended: true }));
@@ -55,7 +55,10 @@ app.get("/hello", (req, res) => {
 // rout that will match POST request from form
 app.post("/urls", (req, res) => {
   console.log(req.body); // Log the POST request body to the console
-  res.send("Ok"); // Respond with 'Ok' (we will replace this)
+  const newId = generateRandomString();
+  urlDatabase[newId] = req.body.longURL;
+  const templateVars = { id: newId, longURL: urlDatabase[req.params.id] };
+  res.render("urls_show", templateVars);
 });
 
 app.listen(PORT, () => {
