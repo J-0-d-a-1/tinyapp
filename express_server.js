@@ -10,6 +10,12 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com",
 };
 
+// returns a string of 6 random alphanumeric characthers
+function generateRandomString() {
+  const random6Letters = Math.random().toString(36).slice(2, 8);
+  return random6Letters;
+}
+
 // getting ready for the POST
 app.use(express.urlencoded({ extended: true }));
 
