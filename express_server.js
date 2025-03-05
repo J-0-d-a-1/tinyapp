@@ -87,9 +87,12 @@ app.post("/urls/:id/edit", (req, res) => {
 
 // to login /login
 app.post("/login", (req, res) => {
-  // first param is 'username', second param is the value of username
-  res.cookie(Object.keys(req.body)[0], req.body.username);
-  res.redirect("/urls");
+  // if username exists
+  if (req.body.username) {
+    // first param is 'username', second param is the value of username
+    res.cookie(Object.keys(req.body)[0], req.body.username);
+    res.redirect("/urls");
+  }
 });
 
 app.listen(PORT, () => {
