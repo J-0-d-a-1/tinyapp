@@ -95,6 +95,14 @@ app.post("/login", (req, res) => {
   }
 });
 
+app.post("/logout", (req, res) => {
+  // need to get the cookie first!!!!!
+  res.cookie("username", req.cookies["username"]);
+  // to clear the cookie with using username
+  res.clearCookie("username");
+  res.redirect("/urls");
+});
+
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}`);
 });
