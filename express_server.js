@@ -95,6 +95,7 @@ app.post("/login", (req, res) => {
   }
 });
 
+// to logout /logout
 app.post("/logout", (req, res) => {
   // need to get the cookie first!!!!!
   res.cookie("username", req.cookies["username"]);
@@ -102,6 +103,17 @@ app.post("/logout", (req, res) => {
   res.clearCookie("username");
   return res.redirect("/urls");
 });
+
+// route for /register
+app.get("/register", (req, res) => {
+  return res.render("register");
+});
+
+// to register /register
+// app.post("/register", (req, res) => {
+//   const { email, password } = req.body;
+
+// });
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}`);
