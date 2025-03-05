@@ -74,8 +74,16 @@ app.post("/urls/:id/delete", (req, res) => {
 
 // to edit a url from /urls/:id/edit
 app.post("/urls/:id/edit", (req, res) => {
-  console.log(req.body);
   urlDatabase[req.params.id] = req.body[req.params.id];
+  res.redirect("/urls");
+});
+
+// to login /login
+app.post("/login", (req, res) => {
+  const userNameKey = Object.keys(req.body)[0];
+  const userNameValue = req.body[userNameKey];
+
+  res.cookie(userNameKey, userNameValue);
   res.redirect("/urls");
 });
 
