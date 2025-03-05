@@ -25,7 +25,7 @@ app.use(cookieParser());
 
 // rout for /
 app.get("/", (req, res) => {
-  res.send("Hello!");
+  return res.send("Hello!");
 });
 
 // rout for /urls
@@ -34,12 +34,12 @@ app.get("/urls", (req, res) => {
     username: req.cookies["username"],
     urls: urlDatabase,
   };
-  res.render("urls_index", templateVars);
+  return res.render("urls_index", templateVars);
 });
 
 // rout for /urls/new
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  return res.render("urls_new");
 });
 
 // rout for /urls/:id
@@ -48,21 +48,21 @@ app.get("/urls/:id", (req, res) => {
     id: req.params.id,
     longURL: urlDatabase[req.params.id],
   };
-  res.render("urls_show", templateVars);
+  return res.render("urls_show", templateVars);
 });
 
 // rout for shareable short url of redirection (/u/:id)
 app.get("/u/:id", (req, res) => {
   const longURL = urlDatabase[req.params.id];
-  res.redirect(longURL);
+  return res.redirect(longURL);
 });
 
 app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
+  return res.json(urlDatabase);
 });
 
 app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
+  return res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
 
 // rout that will match POST request from form
@@ -70,19 +70,19 @@ app.post("/urls", (req, res) => {
   console.log(req.body); // Log the POST request body to the console
   const newId = generateRandomString();
   urlDatabase[newId] = req.body.longURL;
-  res.redirect(`/urls/${newId}`);
+  return res.redirect(`/urls/${newId}`);
 });
 
 // to remove a URL from post /urls/:id/delete
 app.post("/urls/:id/delete", (req, res) => {
   delete urlDatabase[req.params.id];
-  res.redirect("/urls");
+  return res.redirect("/urls");
 });
 
 // to edit a url from /urls/:id/edit
 app.post("/urls/:id/edit", (req, res) => {
   urlDatabase[req.params.id] = req.body[req.params.id];
-  res.redirect("/urls");
+  return res.redirect("/urls");
 });
 
 // to login /login
@@ -91,7 +91,7 @@ app.post("/login", (req, res) => {
   if (req.body.username) {
     // first param is 'username', second param is the value of username
     res.cookie(Object.keys(req.body)[0], req.body.username);
-    res.redirect("/urls");
+    return res.redirect("/urls");
   }
 });
 
@@ -100,7 +100,7 @@ app.post("/logout", (req, res) => {
   res.cookie("username", req.cookies["username"]);
   // to clear the cookie with using username
   res.clearCookie("username");
-  res.redirect("/urls");
+  return res.redirect("/urls");
 });
 
 app.listen(PORT, () => {
