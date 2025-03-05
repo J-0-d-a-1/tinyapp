@@ -80,10 +80,8 @@ app.post("/urls/:id/edit", (req, res) => {
 
 // to login /login
 app.post("/login", (req, res) => {
-  const userNameKey = Object.keys(req.body)[0];
-  const userNameValue = req.body[userNameKey];
-
-  res.cookie(userNameKey, userNameValue);
+  // first param is 'username', second param is the value of username
+  res.cookie(Object.keys(req.body)[0], req.body.username);
   res.redirect("/urls");
 });
 
