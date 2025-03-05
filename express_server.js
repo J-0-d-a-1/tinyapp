@@ -1,3 +1,4 @@
+const cookieParser = require("cookie-parser");
 const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
@@ -19,6 +20,9 @@ const generateRandomString = function () {
 // getting ready for the POST
 app.use(express.urlencoded({ extended: true }));
 
+// to use cookieParse for getting username from cookie
+app.use(cookieParser());
+
 // rout for /
 app.get("/", (req, res) => {
   res.send("Hello!");
@@ -26,7 +30,10 @@ app.get("/", (req, res) => {
 
 // rout for /urls
 app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase };
+  const templateVars = {
+    username: req.cookies["username"],
+    urls: urlDatabase,
+  };
   res.render("urls_index", templateVars);
 });
 
