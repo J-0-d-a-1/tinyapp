@@ -4,18 +4,18 @@ const generateRandomString = function () {
   return random6Letters;
 };
 
-const users = {
-  userRandomID: {
-    id: "userRandomID",
-    email: "user@example.com",
-    password: "purple-monkey-dinosaur",
-  },
-  user2RandomID: {
-    id: "user2RandomID",
-    email: "user2@example.com",
-    password: "dishwasher-funk",
-  },
-};
+// const users = {
+//   userRandomID: {
+//     id: "userRandomID",
+//     email: "user@example.com",
+//     password: "purple-monkey-dinosaur",
+//   },
+//   user2RandomID: {
+//     id: "user2RandomID",
+//     email: "user2@example.com",
+//     password: "dishwasher-funk",
+//   },
+// };
 
 // to find user by Email
 const getUserByEmail = (users, email) => {
@@ -52,9 +52,9 @@ const authenticateUser = (users, email, password) => {
   return { error: null, data: user };
 };
 
-console.log(
-  authenticateUser(users, "user@example.com", "purple-monkey-dinosaur")
-);
+// console.log(
+//   authenticateUser(users, "user@example.com", "purple-monkey-dinosaur")
+// );
 
 const createUser = (users, newUserData) => {
   const newId = generateRandomString();

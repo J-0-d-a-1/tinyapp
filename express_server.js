@@ -13,6 +13,13 @@ const {
 // telling express app to use ejs as its templating engine
 app.set("view engine", "ejs");
 
+// getting ready for the POST
+app.use(express.static("public"));
+app.use(express.urlencoded({ extended: false }));
+
+// to use cookieParse for getting username from cookie
+app.use(cookieParser());
+
 const urlDatabase = {
   b2xVn2: "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com",
@@ -31,13 +38,6 @@ const users = {
   },
 };
 
-// getting ready for the POST
-app.use(express.static("public"));
-app.use(express.urlencoded({ extended: false }));
-
-// to use cookieParse for getting username from cookie
-app.use(cookieParser());
-
 // rout for /
 app.get("/", (req, res) => {
   return res.send("Hello!");
@@ -46,9 +46,15 @@ app.get("/", (req, res) => {
 // rout for /urls
 app.get("/urls", (req, res) => {
   // res.clearCookie("user_id");
+  const id = req.cookies.user_id;
+  if (!id) {
+    return res.redirect("login");
+  }
+  const email = users[id].email;
+  const { data } = getUserByEmail(users, email);
 
   const templateVars = {
-    user: users[req.cookies["user_id"]],
+    user_id: data.id,
     urls: urlDatabase,
   };
   return res.render("urls_index", templateVars);
@@ -130,7 +136,7 @@ app.post("/login", (req, res) => {
 
 // to logout /logout
 app.post("/logout", (req, res) => {
-  // to clear the cookie with using username
+  // to clear the cookie with using user_id
   res.clearCookie("user_id");
   return res.redirect("/login");
 });
