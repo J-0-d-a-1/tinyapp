@@ -4,19 +4,6 @@ const generateRandomString = function () {
   return random6Letters;
 };
 
-// const users = {
-//   userRandomID: {
-//     id: "userRandomID",
-//     email: "user@example.com",
-//     password: "purple-monkey-dinosaur",
-//   },
-//   user2RandomID: {
-//     id: "user2RandomID",
-//     email: "user2@example.com",
-//     password: "dishwasher-funk",
-//   },
-// };
-
 // to find user by Email
 const getUserByEmail = (users, email) => {
   let user;
@@ -77,10 +64,65 @@ const createUser = (users, newUserData) => {
 
   return { error: null, data: newUser };
 };
+// const users = {
+//   userRandomID: {
+//     id: "userRandomID",
+//     email: "user@example.com",
+//     password: "purple-monkey-dinosaur",
+//   },
+//   user2RandomID: {
+//     id: "user2RandomID",
+//     email: "user2@example.com",
+//     password: "dishwasher-funk",
+//   },
+// };
+// const urlDatabase = {
+//   b2xVn2: { longURL: "http://www.lighthouselabs.ca", userID: "userRandomID" },
+//   "9sm5xK": { longURL: "http://www.google.com", userID: "userRandomID" },
+// };
+
+const urlsForUser = (database, id) => {
+  const matchedURLs = {};
+
+  for (const shortURL in database) {
+    const data = database[shortURL];
+    for (const key in data) {
+      if (key === "userID") {
+        if (data[key] === id) {
+          matchedURLs[shortURL] = data["longURL"];
+        }
+      }
+    }
+  }
+
+  if (Object.keys(matchedURLs).length === 0) {
+    return { error: "No URLs", data: null };
+  }
+
+  return { error: null, urls: matchedURLs };
+};
+
+const checkTheURLExist = (urls, id) => {
+  let resultURL;
+
+  for (const urlsId in urls) {
+    if (urlsId === id) {
+      resultURL = urlsId;
+      return { errorForId: null, urlId: resultURL };
+    }
+  }
+
+  return { errorForId: "No id exist", urlId: null };
+};
+
+// console.log(urlsForUser(urlDatabase, "userRandomID"));
+// console.log(urlsForUser(urlDatabase, "user2RandomID"));
 
 module.exports = {
   generateRandomString,
   createUser,
   getUserByEmail,
   authenticateUser,
+  urlsForUser,
+  checkTheURLExist,
 };

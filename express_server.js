@@ -8,6 +8,8 @@ const {
   createUser,
   getUserByEmail,
   authenticateUser,
+  urlsForUser,
+  checkTheURLExist,
 } = require("./helpers/userHelpers");
 
 // telling express app to use ejs as its templating engine
@@ -21,8 +23,8 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
 const urlDatabase = {
-  b2xVn2: "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com",
+  b2xVn2: { longURL: "http://www.lighthouselabs.ca", userID: "userRandomID" },
+  "9sm5xK": { longURL: "http://www.google.com", userID: "userRandomID" },
 };
 
 const users = {
@@ -53,9 +55,11 @@ app.get("/urls", (req, res) => {
   const email = users[id].email;
   const { data } = getUserByEmail(users, email);
 
+  const { urls } = urlsForUser(urlDatabase, id);
+
   const templateVars = {
     user_id: data.id,
-    urls: urlDatabase,
+    urls,
   };
   return res.render("urls_index", templateVars);
 });
@@ -78,9 +82,28 @@ app.get("/urls/new", (req, res) => {
 
 // rout for /urls/:id
 app.get("/urls/:id", (req, res) => {
+  const userId = req.cookies.user_id;
+
+  if (!userId) {
+    return res.status(300).send("You need to loggin");
+  }
+  const { email } = users[userId];
+  const { data } = getUserByEmail(users, email);
+  const { error, urls } = urlsForUser(urlDatabase, data.id);
+
+  const id = req.params.id;
+  const { errorForId, urlId } = checkTheURLExist(urls, id);
+  if (error) {
+    if (errorForId) {
+      return res.status(404).send("Page Not Found!");
+    }
+    return res.status(300).send("This URL isn't yours!");
+  }
+
   const templateVars = {
-    id: req.params.id,
-    longURL: urlDatabase[req.params.id],
+    user_id: data.id,
+    id: urlId,
+    longURL: urls[id],
   };
   return res.render("urls_show", templateVars);
 });
@@ -120,7 +143,26 @@ app.post("/urls", (req, res) => {
 
 // to remove a URL from post /urls/:id/delete
 app.post("/urls/:id/delete", (req, res) => {
-  delete urlDatabase[req.params.id];
+  const userId = req.cookies.user_id;
+  if (!userId) {
+    return res.status(400).send("You need to loggin");
+  }
+
+  const { email } = users[userId];
+  const { data } = getUserByEmail(users, email);
+  const { error, urls } = urlsForUser(urlDatabase, data.id);
+
+  const id = req.params.id;
+  const { errorForId, urlId } = checkTheURLExist(urls, id);
+
+  if (error) {
+    if (errorForId) {
+      return res.status(404).send("Page Not Found!");
+    }
+    return res.status(400).send("This URL isn't yours!");
+  }
+
+  delete urlDatabase[urlId];
   return res.redirect("/urls");
 });
 
