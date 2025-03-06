@@ -3,6 +3,12 @@ const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
 
+const {
+  generateRandomString,
+  createUser,
+  getUserByEmail,
+} = require("./helpers/userHelpers");
+
 // telling express app to use ejs as its templating engine
 app.set("view engine", "ejs");
 
@@ -22,12 +28,6 @@ const users = {
     email: "user2@example.com",
     password: "dishwasher-funk",
   },
-};
-
-// returns a string of 6 random alphanumeric characthers
-const generateRandomString = function () {
-  const random6Letters = Math.random().toString(36).slice(2, 8);
-  return random6Letters;
 };
 
 // getting ready for the POST
@@ -86,7 +86,6 @@ app.get("/hello", (req, res) => {
 
 // rout that will match POST request from form
 app.post("/urls", (req, res) => {
-  console.log(req.body); // Log the POST request body to the console
   const newId = generateRandomString();
   urlDatabase[newId] = req.body.longURL;
   return res.redirect(`/urls/${newId}`);
@@ -106,11 +105,14 @@ app.post("/urls/:id/edit", (req, res) => {
 
 // to login /login
 app.post("/login", (req, res) => {
-  if (req.body.username) {
-    // first param is 'username', second param is the value of username
-    res.cookie(Object.keys(req.body)[0], req.body.username);
-    return res.redirect("/urls");
+  const { error, user } = getUserByEmail(users, req.body.email);
+
+  if (error) {
+    return res.sendStatus("400");
   }
+  // first param is 'username', second param is the value of username
+  res.cookie("id", user.id);
+  return res.redirect("/urls");
 });
 
 // to logout /logout
@@ -128,21 +130,27 @@ app.get("/register", (req, res) => {
     user: users[req.cookies["user_id"]],
   };
 
+  //extract email from cookkie
+  const { email } = req.cookies;
+
+  const { error } = getUserByEmail(users, email);
+
+  if (!error) {
+    return res.redirect("/register");
+  }
+
   return res.render("register", templateVars);
 });
 
 // to register /register
 app.post("/register", (req, res) => {
-  const { email, password } = req.body; // get the email and password from register form.
+  const { error, user } = createUser(users, req.body);
 
-  const newId = generateRandomString(); // create new id
+  if (error) {
+    return res.sendStatus(400);
+  }
 
-  const newUser = { id: newId, email, password };
-
-  users[newId] = newUser;
-
-  res.cookie("user_id", users[newId].id);
-
+  res.cookie("user_id", user.id);
   return res.redirect("/urls");
 });
 
