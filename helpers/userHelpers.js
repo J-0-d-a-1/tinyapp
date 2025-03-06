@@ -4,6 +4,19 @@ const generateRandomString = function () {
   return random6Letters;
 };
 
+const users = {
+  userRandomID: {
+    id: "userRandomID",
+    email: "user@example.com",
+    password: "purple-monkey-dinosaur",
+  },
+  user2RandomID: {
+    id: "user2RandomID",
+    email: "user2@example.com",
+    password: "dishwasher-funk",
+  },
+};
+
 // to find user by Email
 const getUserByEmail = (users, email) => {
   let user;
@@ -18,18 +31,30 @@ const getUserByEmail = (users, email) => {
 
   return { error: "No user matching", data: null };
 };
-// const users = {
-//   userRandomID: {
-//     id: "userRandomID",
-//     email: "user@example.com",
-//     password: "purple-monkey-dinosaur",
-//   },
-//   user2RandomID: {
-//     id: "user2RandomID",
-//     email: "user2@example.com",
-//     password: "dishwasher-funk",
-//   },
-// };
+
+const authenticateUser = (users, email, password) => {
+  let user;
+
+  for (const userId in users) {
+    if (users[userId].email === email) {
+      user = users[userId];
+    }
+  }
+
+  if (!user) {
+    return { error: "No user exist", data: null };
+  }
+
+  if (user.password !== password) {
+    return { error: "invalid password", data: null };
+  }
+
+  return { error: null, data: user };
+};
+
+console.log(
+  authenticateUser(users, "user@example.com", "purple-monkey-dinosaur")
+);
 
 const createUser = (users, newUserData) => {
   const newId = generateRandomString();
@@ -53,4 +78,9 @@ const createUser = (users, newUserData) => {
   return { error: null, data: newUser };
 };
 
-module.exports = { generateRandomString, createUser, getUserByEmail };
+module.exports = {
+  generateRandomString,
+  createUser,
+  getUserByEmail,
+  authenticateUser,
+};
