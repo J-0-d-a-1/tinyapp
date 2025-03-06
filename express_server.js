@@ -136,7 +136,7 @@ app.get("/register", (req, res) => {
   const { error } = getUserByEmail(users, email);
 
   if (!error) {
-    return res.redirect("/register");
+    return res.sendStatus(400).send(error);
   }
 
   return res.render("register", templateVars);
@@ -147,7 +147,7 @@ app.post("/register", (req, res) => {
   const { error, user } = createUser(users, req.body);
 
   if (error) {
-    return res.sendStatus(400);
+    return res.sendStatus(400).send(error);
   }
 
   res.cookie("user_id", user.id);
