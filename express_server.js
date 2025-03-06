@@ -130,20 +130,20 @@ app.get("/register", (req, res) => {
     user: users[req.cookies["user_id"]],
   };
 
-  //extract email from cookkie
-  const { email } = req.cookies;
-
-  const { error } = getUserByEmail(users, email);
-
-  if (!error) {
-    return res.sendStatus(400).send(error);
-  }
-
   return res.render("register", templateVars);
 });
 
 // to register /register
 app.post("/register", (req, res) => {
+  //extract email from cookkie
+  const { email } = req.body.email;
+
+  const { errorForNoUser } = getUserByEmail(users, email);
+
+  if (!errorForNoUser) {
+    return res.sendStatus(400).send(errorForNoUser);
+  }
+
   const { error, user } = createUser(users, req.body);
 
   if (error) {
