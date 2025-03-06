@@ -258,11 +258,11 @@ app.post("/register", (req, res) => {
   const hashedPassword = bcrypt.hashSync(password, 10);
   const newUserData = { email, password: hashedPassword };
 
-  const result = authenticateUser(users, email, password);
-  // // handling existing email
-  if (!result.error) {
-    return res.status(400).send("email is already exist!");
-  }
+  // const result = authenticateUser(users, email, password);
+  // // // handling existing email
+  // if (!result.error) {
+  //   return res.status(400).send("email is already exist!");
+  // }
 
   const newUserResult = createUser(users, newUserData);
 
