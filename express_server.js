@@ -31,7 +31,8 @@ const users = {
 };
 
 // getting ready for the POST
-app.use(express.urlencoded({ extended: true }));
+app.use(express.static("public"));
+app.use(express.urlencoded({ extended: false }));
 
 // to use cookieParse for getting username from cookie
 app.use(cookieParser());
@@ -43,7 +44,7 @@ app.get("/", (req, res) => {
 
 // rout for /urls
 app.get("/urls", (req, res) => {
-  res.clearCookie("user_id");
+  // res.clearCookie("user_id");
 
   const templateVars = {
     user: users[req.cookies["user_id"]],
@@ -76,13 +77,13 @@ app.get("/u/:id", (req, res) => {
   return res.redirect(longURL);
 });
 
-app.get("/urls.json", (req, res) => {
-  return res.json(urlDatabase);
-});
+// app.get("/urls.json", (req, res) => {
+//   return res.json(urlDatabase);
+// });
 
-app.get("/hello", (req, res) => {
-  return res.send("<html><body>Hello <b>World</b></body></html>\n");
-});
+// app.get("/hello", (req, res) => {
+//   return res.send("<html><body>Hello <b>World</b></body></html>\n");
+// });
 
 // rout that will match POST request from form
 app.post("/urls", (req, res) => {
@@ -101,6 +102,11 @@ app.post("/urls/:id/delete", (req, res) => {
 app.post("/urls/:id/edit", (req, res) => {
   urlDatabase[req.params.id] = req.body[req.params.id];
   return res.redirect("/urls");
+});
+
+// Login form /login
+app.get("/login", (req, res) => {
+  return res.render("login.ejs");
 });
 
 // to login /login
@@ -139,14 +145,16 @@ app.post("/register", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
 
-  const { errorForNoUser } = getUserByEmail(users, email);
-
-  if (!errorForNoUser) {
-    return res.status(400).send(errorForNoUser);
-  }
-
+  // handling empty field
   if (!email || !password) {
     return res.status(400).send("Email and password are required");
+  }
+
+  const { errorForNoUser } = getUserByEmail(users, email);
+
+  // handling existing email
+  if (!errorForNoUser) {
+    return res.status(400).send(errorForNoUser);
   }
 
   const { error, user } = createUser(users, req.body);
