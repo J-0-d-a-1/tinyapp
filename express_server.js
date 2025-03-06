@@ -136,18 +136,23 @@ app.get("/register", (req, res) => {
 // to register /register
 app.post("/register", (req, res) => {
   //extract email from cookkie
-  const { email } = req.body.email;
+  const email = req.body.email;
+  const password = req.body.password;
 
   const { errorForNoUser } = getUserByEmail(users, email);
 
   if (!errorForNoUser) {
-    return res.sendStatus(400).send(errorForNoUser);
+    return res.status(400).send(errorForNoUser);
+  }
+
+  if (!email || !password) {
+    return res.status(400).send("Email and password are required");
   }
 
   const { error, user } = createUser(users, req.body);
 
   if (error) {
-    return res.sendStatus(400).send(error);
+    return res.status(400).send(error);
   }
 
   res.cookie("user_id", user.id);
