@@ -19,7 +19,7 @@
       </div>
     </div>
 
-    <% if(!user_id) { %>
+    <% if(typeof user_id === 'undefined' || !user_id) { %>
     <form method="POST" action="/login">
       <a href="/login">Login</a>
       <a href="/register">Register</a>

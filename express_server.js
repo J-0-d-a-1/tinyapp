@@ -62,8 +62,15 @@ app.get("/urls", (req, res) => {
 
 // rout for /urls/new
 app.get("/urls/new", (req, res) => {
+  const id = req.cookies.user_id;
+  if (!id) {
+    return res.redirect("/login");
+  }
+  const email = users[id].email;
+  const { data } = getUserByEmail(users, email);
+
   const templateVars = {
-    user: users[req.cookies["user_id"]],
+    user_id: data.id,
   };
 
   return res.render("urls_new", templateVars);
@@ -81,6 +88,11 @@ app.get("/urls/:id", (req, res) => {
 // rout for shareable short url of redirection (/u/:id)
 app.get("/u/:id", (req, res) => {
   const longURL = urlDatabase[req.params.id];
+
+  if (!longURL) {
+    return res.status(404).send("Page Not Found");
+  }
+
   return res.redirect(longURL);
 });
 
@@ -94,6 +106,13 @@ app.get("/u/:id", (req, res) => {
 
 // rout that will match POST request from form
 app.post("/urls", (req, res) => {
+  const id = req.cookies.user_id;
+  if (!id) {
+    return res.send("You need to login");
+  }
+  const email = users[id].email;
+  const { data } = getUserByEmail(users, email);
+
   const newId = generateRandomString();
   urlDatabase[newId] = req.body.longURL;
   return res.redirect(`/urls/${newId}`);
@@ -143,8 +162,16 @@ app.post("/logout", (req, res) => {
 
 // route for /register
 app.get("/register", (req, res) => {
+  const id = req.cookies.user_id;
+  const email = users[id].email;
+  const { error, data } = getUserByEmail(users, email);
+
+  if (!error) {
+    return res.redirect("urls");
+  }
+
   const templateVars = {
-    user: users[req.cookies["user_id"]],
+    user_id: data.id,
   };
 
   return res.render("register", templateVars);
