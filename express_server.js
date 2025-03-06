@@ -1,4 +1,5 @@
 const cookieParser = require("cookie-parser");
+const bcrypt = require("bcryptjs");
 const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
@@ -52,7 +53,7 @@ app.get("/urls", (req, res) => {
   if (!id) {
     return res.redirect("login");
   }
-  const email = users[id].email;
+  const email = users[id]["email"];
   const { data } = getUserByEmail(users, email);
 
   const { urls } = urlsForUser(urlDatabase, id);
@@ -97,7 +98,11 @@ app.get("/urls/:id", (req, res) => {
     if (errorForId) {
       return res.status(404).send("Page Not Found!");
     }
-    return res.status(300).send("This URL isn't yours!");
+    return res.status(400).send("This URL isn't yours!");
+  }
+
+  if (!urls[id]) {
+    return res.status(404).send("Page Not Found");
   }
 
   const templateVars = {
@@ -168,12 +173,21 @@ app.post("/urls/:id/delete", (req, res) => {
 
 // to edit a url from /urls/:id/edit
 app.post("/urls/:id/edit", (req, res) => {
+  if (!urlDatabase[req.params.id]) {
+    return res.status(404).send("the URL is invalid");
+  }
+
   urlDatabase[req.params.id] = req.body[req.params.id];
   return res.redirect("/urls");
 });
 
 // Login form /login
 app.get("/login", (req, res) => {
+  const id = req.cookies.user_id;
+  if (id) {
+    return res.redirect("/urls");
+  }
+
   const templateVars = {
     user: users[req.cookies["user_id"]],
   };
@@ -183,6 +197,8 @@ app.get("/login", (req, res) => {
 // to login /login
 app.post("/login", (req, res) => {
   const { email, password } = req.body;
+
+  // bcrypt.compareSync(password, hashedPassword);
 
   const { error, data } = authenticateUser(users, email, password);
 
@@ -205,18 +221,24 @@ app.post("/logout", (req, res) => {
 // route for /register
 app.get("/register", (req, res) => {
   const id = req.cookies.user_id;
-  const email = users[id].email;
-  const { error, data } = getUserByEmail(users, email);
-
-  if (!error) {
-    return res.redirect("urls");
+  if (id) {
+    return res.redirect("/login");
   }
 
-  const templateVars = {
-    user_id: data.id,
-  };
+  // const email = users[id].email;
+  // if (email) {
+  //   const { error, data } = getUserByEmail(users, email);
 
-  return res.render("register", templateVars);
+  //   if (!error) {
+  //     return res.redirect("urls");
+  //   }
+  // }
+
+  // const templateVars = {
+  //   user_id: data.id,
+  // };
+
+  return res.render("register");
 });
 
 // to register /register
@@ -229,18 +251,22 @@ app.post("/register", (req, res) => {
     return res.status(400).send("Email and password are required");
   }
 
+  const hashedPassword = bcrypt.hashSync(password, 10);
+  const newUserData = { email, password: hashedPassword };
+
   const result = authenticateUser(users, email, password);
   // // handling existing email
   if (!result.error) {
     return res.status(400).send("email is already exist!");
   }
 
-  const newUserResult = createUser(users, req.body);
+  const newUserResult = createUser(users, newUserData);
 
   // handling invalid empty field
   if (newUserResult.error) {
     return res.status(400).send(newUserResult.error);
   }
+  console.log(users);
   res.cookie("user_id", newUserResult.data.id);
   return res.redirect("/urls");
 });
