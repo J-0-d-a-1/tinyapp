@@ -89,6 +89,10 @@ app.get("/urls/:id", (req, res) => {
     return res.status(300).send("You need to loggin");
   }
   const { email } = users[userId];
+  if (!users[userId]) {
+    return res.status(400).send("You need to register");
+  }
+
   const { data } = getUserByEmail(users, email);
   const { error, urls } = urlsForUser(urlDatabase, data.id);
 
