@@ -121,7 +121,7 @@ app.post("/login", (req, res) => {
 
   if (error) {
     // first param is 'username', second param is the value of username
-    return res.status("403").send("email or password is invalid!");
+    return res.status(403).send("email or password is invalid!");
   }
 
   res.cookie("user_id", data.id);
@@ -130,8 +130,6 @@ app.post("/login", (req, res) => {
 
 // to logout /logout
 app.post("/logout", (req, res) => {
-  // need to get the cookie first!!!!!
-  res.cookie("user_id", req.cookies["user_id"]);
   // to clear the cookie with using username
   res.clearCookie("user_id");
   return res.redirect("/login");
@@ -158,18 +156,17 @@ app.post("/register", (req, res) => {
 
   const result = authenticateUser(users, email, password);
   // // handling existing email
-  if (result.error) {
+  if (!result.error) {
     return res.status(400).send("email is already exist!");
   }
 
-  const errorMessage = createUser(users, req.body).error;
-  const user = createUser(users, req.body).data;
+  const newUserResult = createUser(users, req.body);
 
   // handling invalid empty field
-  if (errorMessage) {
-    return res.status(400).send(errorMessage);
+  if (newUserResult.error) {
+    return res.status(400).send(newUserResult.error);
   }
-  res.cookie("user_id", user.id);
+  res.cookie("user_id", newUserResult.data.id);
   return res.redirect("/urls");
 });
 
