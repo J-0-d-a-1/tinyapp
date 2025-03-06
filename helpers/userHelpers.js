@@ -12,13 +12,24 @@ const getUserByEmail = (users, email) => {
   for (const userId in users) {
     if (users[userId].email === email) {
       user = users[userId];
-    } else {
-      return { error: "No user matching", data: null };
+      return { error: null, data: user };
     }
   }
 
-  return { error: null, data: user };
+  return { error: "No user matching", data: null };
 };
+// const users = {
+//   userRandomID: {
+//     id: "userRandomID",
+//     email: "user@example.com",
+//     password: "purple-monkey-dinosaur",
+//   },
+//   user2RandomID: {
+//     id: "user2RandomID",
+//     email: "user2@example.com",
+//     password: "dishwasher-funk",
+//   },
+// };
 
 const createUser = (users, newUserData) => {
   const newId = generateRandomString();

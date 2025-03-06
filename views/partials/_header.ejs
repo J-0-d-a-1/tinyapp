@@ -20,9 +20,15 @@
     </div>
 
     <% if(!user) { %>
-    <a href="/register">Register</a>
+    <form method="POST" action="/login">
+      <a href="/login">Login</a>
+      <a href="/register">Register</a>
+    </form>
     <% } else { %>
-    <a href="/login">Login</a>
+    <form method="POST" action="/logout">
+      <p>Logged in as: <%= user.id %></p>
+      <button type="submit">Logout</button>
+    </form>
     <% } %>
   </nav>
 </header>

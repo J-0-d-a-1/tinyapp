@@ -106,19 +106,28 @@ app.post("/urls/:id/edit", (req, res) => {
 
 // Login form /login
 app.get("/login", (req, res) => {
-  return res.render("login.ejs");
+  const templateVars = {
+    user: users[req.cookies["user_id"]],
+  };
+  return res.render("login.ejs", templateVars);
 });
 
 // to login /login
 app.post("/login", (req, res) => {
-  const { error, user } = getUserByEmail(users, req.body.email);
+  const { email, password } = req.body;
+  const { error, data } = getUserByEmail(users, email);
 
-  if (error) {
-    return res.sendStatus("400");
+  console.log(error, data);
+  if (!error) {
+    if (password !== data.password) {
+      return res.status("403").send("Invalid password!");
+    } else {
+      res.cookie("user_id", data.id);
+      return res.redirect("/urls");
+    }
   }
   // first param is 'username', second param is the value of username
-  res.cookie("id", user.id);
-  return res.redirect("/urls");
+  return res.status("403").send("email or password is invalid!");
 });
 
 // to logout /logout
@@ -127,7 +136,7 @@ app.post("/logout", (req, res) => {
   res.cookie("user_id", req.cookies["user_id"]);
   // to clear the cookie with using username
   res.clearCookie("user_id");
-  return res.redirect("/urls");
+  return res.redirect("/login");
 });
 
 // route for /register
@@ -150,19 +159,21 @@ app.post("/register", (req, res) => {
     return res.status(400).send("Email and password are required");
   }
 
-  const { errorForNoUser } = getUserByEmail(users, email);
+  const { error, data } = getUserByEmail(users, email);
+  console.log(error, data, email);
 
-  // handling existing email
-  if (!errorForNoUser) {
-    return res.status(400).send(errorForNoUser);
+  // // handling existing email
+  if (!error) {
+    return res.status(400).send("email is already exist!");
   }
 
-  const { error, user } = createUser(users, req.body);
+  const errorMessage = createUser(users, req.body).error;
+  const user = createUser(users, req.body).data;
 
-  if (error) {
-    return res.status(400).send(error);
+  // handling invalid empty field
+  if (errorMessage) {
+    return res.status(400).send(errorMessage);
   }
-
   res.cookie("user_id", user.id);
   return res.redirect("/urls");
 });
