@@ -1,3 +1,5 @@
+const bcrypt = require("bcryptjs");
+
 // returns a string of 6 random alphanumeric characthers
 const generateRandomString = function () {
   const random6Letters = Math.random().toString(36).slice(2, 8);
@@ -32,7 +34,7 @@ const authenticateUser = (users, email, password) => {
     return { error: "No user exist", data: null };
   }
 
-  if (user.password !== password) {
+  if (!bcrypt.compareSync(password, user.password)) {
     return { error: "invalid password", data: null };
   }
 
@@ -49,7 +51,7 @@ const createUser = (users, newUserData) => {
   const newUser = {
     id: newId,
     email: newUserData.email,
-    password: newUserData.password,
+    password: bcrypt.hashSync(newUserData.password, 10),
   };
 
   // checking if there is any empty value

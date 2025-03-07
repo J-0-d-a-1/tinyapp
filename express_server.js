@@ -202,16 +202,10 @@ app.get("/login", (req, res) => {
 app.post("/login", (req, res) => {
   const id = req.cookies.user_id;
   if (!id) {
-    return res.redirect("/register");
+    return res.send("You need to register!");
   }
 
-  const hashedPassword = users[id].password;
   const { email, password } = req.body;
-
-  if (!bcrypt.compareSync(password, hashedPassword)) {
-    return res.status(403).send("password is invalid!");
-  }
-
   const { error, data } = authenticateUser(users, email, password);
 
   if (error) {
@@ -269,8 +263,7 @@ app.post("/register", (req, res) => {
     return res.status(400).send("email is already exist!");
   }
 
-  const hashedPassword = bcrypt.hashSync(password, 10);
-  const newUserData = { email, password: hashedPassword };
+  const newUserData = { email, password };
 
   const newUserResult = createUser(users, newUserData);
 
