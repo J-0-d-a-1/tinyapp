@@ -203,7 +203,7 @@ app.get("/login", (req, res) => {
   }
 
   const templateVars = {
-    user: users[req.session["id"]],
+    user: users[req.session.id],
   };
   return res.render("login.ejs", templateVars);
 });
@@ -225,7 +225,8 @@ app.post("/login", (req, res) => {
 // to logout /logout
 app.post("/logout", (req, res) => {
   // to clear the cookie with using
-  res.clearCookie("session");
+  // res.clearCookie("session");
+  req.session = null;
   return res.redirect("/login");
 });
 
