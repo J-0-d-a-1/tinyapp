@@ -63,11 +63,6 @@ const createUser = (users, newUserData) => {
   return { error: null, data: newUser };
 };
 
-// const urlDatabase = {
-//   b2xVn2: { longURL: "http://www.lighthouselabs.ca", userID: "userRandomID" },
-//   "9sm5xK": { longURL: "http://www.google.com", userID: "userRandomID" },
-// };
-
 const urlsForUser = (database, id) => {
   const matchedURLs = {};
 
@@ -91,8 +86,6 @@ const urlsForUser = (database, id) => {
 
   return { error: null, data: matchedURLs };
 };
-
-// console.log(urlsForUser(urlDatabase2, "user123"));
 
 const checkTheURLExist = (urls, id) => {
   let resultURL;

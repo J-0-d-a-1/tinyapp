@@ -11,7 +11,7 @@ const {
   getUserByEmail,
   authenticateUser,
   urlsForUser,
-  checkTheURLExist,
+  // checkTheURLExist,
 } = require("./helpers");
 
 // telling express app to use ejs as its templating engine
@@ -62,15 +62,13 @@ app.get("/urls", (req, res) => {
     return res.redirect("login");
   }
   const email = users[id]["email"];
-  const { data } = getUserByEmail(users, email);
+  const { error, data } = getUserByEmail(users, email);
 
-  const { urls } = urlsForUser(urlDatabase, id);
-
+  const urls = urlsForUser(urlDatabase, id).data;
   const templateVars = {
     user_id: data.id,
     urls,
   };
-  // res.cookie("", id);
   return res.render("urls_index", templateVars);
 });
 
@@ -83,59 +81,56 @@ app.get("/urls/new", (req, res) => {
   const email = users[id].email;
   const { data } = getUserByEmail(users, email);
 
-  // const templateVars = {
-  //   : data.id,
-  // };
+  const templateVars = {
+    user_id: data.id,
+  };
 
   req.session.id = data.id;
-  return res.render("urls_new");
+  return res.render("urls_new", templateVars);
 });
 
 // rout for /urls/:id
 app.get("/urls/:id", (req, res) => {
+  // userId
   const userId = req.session.id;
-
   if (!userId) {
     return res.status(300).send("You need to loggin");
   }
-  const { email } = users[userId];
   if (!users[userId]) {
     return res.status(400).send("You need to register");
   }
-
-  const { data } = getUserByEmail(users, email);
-  const { error, urls } = urlsForUser(urlDatabase, data.id);
-
-  const id = req.params.id;
-  const { errorForId, urlId } = checkTheURLExist(urls, id);
-  if (error) {
-    if (errorForId) {
-      return res.status(404).send("Page Not Found!");
-    }
-    return res.status(400).send("This URL isn't yours!");
+  const email = users[userId].email;
+  if (!email) {
+    return res.send("Please log in");
   }
 
-  if (!urls[id]) {
-    return res.status(404).send("Page Not Found");
+  const { data } = getUserByEmail(users, email);
+
+  // shortURL
+  const id = req.params.id;
+
+  if (!Object.values(urlDatabase[id]).includes(userId)) {
+    return res.send("This is not yours");
   }
 
   const templateVars = {
     user_id: data.id,
-    id: urlId,
-    longURL: urls[id],
+    id,
+    longURL: urlDatabase[id].longURL,
   };
+
   return res.render("urls_show", templateVars);
 });
 
 // rout for shareable short url of redirection (/u/:id)
 app.get("/u/:id", (req, res) => {
-  const longURL = urlDatabase[req.params.id];
-
-  if (!longURL) {
+  const shortURL = req.params.id;
+  const actualURL = urlDatabase[shortURL].longURL;
+  if (!actualURL) {
     return res.status(404).send("Page Not Found");
   }
 
-  return res.redirect(longURL);
+  return res.redirect(actualURL);
 });
 
 // app.get("/urls.json", (req, res) => {
@@ -150,38 +145,27 @@ app.get("/u/:id", (req, res) => {
 app.post("/urls", (req, res) => {
   const id = req.session.id;
   if (!id) {
-    return res.send("You need to login");
+    return res.send("You need to login!");
   }
-  const email = users[id].email;
-  const { data } = getUserByEmail(users, email);
+  const { error, data } = getUserByEmail(users, users[id].email);
 
   const newId = generateRandomString();
-  urlDatabase[newId] = req.body.longURL;
+  urlDatabase[newId] = { longURL: req.body.longURL, userID: data.id };
+  console.log(urlDatabase);
   return res.redirect(`/urls/${newId}`);
 });
 
 // to remove a URL from post /urls/:id/delete
 app.post("/urls/:id/delete", (req, res) => {
+  // userId
   const userId = req.session.id;
   if (!userId) {
     return res.status(400).send("You need to loggin");
   }
 
-  const { email } = users[userId];
-  const { data } = getUserByEmail(users, email);
-  const { error, urls } = urlsForUser(urlDatabase, data.id);
+  const shortURL = req.params.id;
 
-  const id = req.params.id;
-  const { errorForId, urlId } = checkTheURLExist(urls, id);
-
-  if (error) {
-    if (errorForId) {
-      return res.status(404).send("Page Not Found!");
-    }
-    return res.status(400).send("This URL isn't yours!");
-  }
-
-  delete urlDatabase[urlId];
+  delete urlDatabase[shortURL];
   return res.redirect("/urls");
 });
 
@@ -214,7 +198,6 @@ app.post("/login", (req, res) => {
   const { error, data } = authenticateUser(users, email, password);
 
   if (error) {
-    // first param is 'username', second param is the value of username
     return res.status(403).send(error);
   }
 
@@ -237,19 +220,6 @@ app.get("/register", (req, res) => {
     return res.redirect("/login");
   }
 
-  // const email = users[id].email;
-  // if (email) {
-  //   const { error, data } = getUserByEmail(users, email);
-
-  //   if (!error) {
-  //     return res.redirect("urls");
-  //   }
-  // }
-
-  // const templateVars = {
-  //   : data.id,
-  // };
-
   return res.render("register");
 });
 
@@ -264,7 +234,7 @@ app.post("/register", (req, res) => {
   }
 
   const result = authenticateUser(users, email, password);
-  // // handling existing email
+  // handling existing email
   if (!result.error) {
     return res.status(400).send("email is already exist!");
   }

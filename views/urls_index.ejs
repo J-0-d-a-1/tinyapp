@@ -22,6 +22,9 @@
 
     <main style="margin: 1em">
       <h3>My URLs</h3>
+      <% if (!urls) { %>
+      <p>Add You URL</p>
+      <% } else { %>
       <table class="table">
         <thead>
           <tr>
@@ -36,7 +39,9 @@
           <tr>
             <td><a href="/urls/<%= shortURL %>"><%= shortURL %></a></td>
             <td>
-              <a href="<%= urls[shortURL] %>"><%= urls[shortURL] %></a>
+              <a href="<%= urls[shortURL].longURL %>"
+                ><%= urls[shortURL].longURL %></a
+              >
             </td>
             <td>
               <button>
@@ -50,6 +55,7 @@
           <% } %>
         </tbody>
       </table>
+      <% } %>
     </main>
     <!-- Bootstrap JS -->
     <script
