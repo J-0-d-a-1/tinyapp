@@ -1,4 +1,5 @@
 const cookieParser = require("cookie-parser");
+const cookieSession = require("cookie-session");
 const bcrypt = require("bcryptjs");
 const express = require("express");
 const app = express();
@@ -22,6 +23,13 @@ app.use(express.urlencoded({ extended: false }));
 
 // to use cookieParse for getting username from cookie
 app.use(cookieParser());
+// Encrypt / Decrypt the content of the 'session' cookie
+app.use(
+  cookieSession({
+    name: "session",
+    keys: ["This app is created by feature web developer"],
+  })
+);
 
 const urlDatabase = {
   b2xVn2: { longURL: "http://www.lighthouselabs.ca", userID: "userRandomID" },
@@ -48,8 +56,8 @@ app.get("/", (req, res) => {
 
 // rout for /urls
 app.get("/urls", (req, res) => {
-  // res.clearCookie("user_id");
-  const id = req.cookies.user_id;
+  // res.clearCookie("");
+  const id = req.session.id;
   if (!id) {
     return res.redirect("login");
   }
@@ -62,28 +70,30 @@ app.get("/urls", (req, res) => {
     user_id: data.id,
     urls,
   };
+  // res.cookie("", id);
   return res.render("urls_index", templateVars);
 });
 
 // rout for /urls/new
 app.get("/urls/new", (req, res) => {
-  const id = req.cookies.user_id;
+  const id = req.session.id;
   if (!id) {
     return res.redirect("/login");
   }
   const email = users[id].email;
   const { data } = getUserByEmail(users, email);
 
-  const templateVars = {
-    user_id: data.id,
-  };
+  // const templateVars = {
+  //   : data.id,
+  // };
 
-  return res.render("urls_new", templateVars);
+  req.session.id = data.id;
+  return res.render("urls_new");
 });
 
 // rout for /urls/:id
 app.get("/urls/:id", (req, res) => {
-  const userId = req.cookies.user_id;
+  const userId = req.session.id;
 
   if (!userId) {
     return res.status(300).send("You need to loggin");
@@ -138,7 +148,7 @@ app.get("/u/:id", (req, res) => {
 
 // rout that will match POST request from form
 app.post("/urls", (req, res) => {
-  const id = req.cookies.user_id;
+  const id = req.session.id;
   if (!id) {
     return res.send("You need to login");
   }
@@ -152,7 +162,7 @@ app.post("/urls", (req, res) => {
 
 // to remove a URL from post /urls/:id/delete
 app.post("/urls/:id/delete", (req, res) => {
-  const userId = req.cookies.user_id;
+  const userId = req.session.id;
   if (!userId) {
     return res.status(400).send("You need to loggin");
   }
@@ -187,46 +197,41 @@ app.post("/urls/:id/edit", (req, res) => {
 
 // Login form /login
 app.get("/login", (req, res) => {
-  const id = req.cookies.user_id;
+  const id = req.session.id;
   if (id) {
     return res.redirect("/urls");
   }
 
   const templateVars = {
-    user: users[req.cookies["user_id"]],
+    user: users[req.session["id"]],
   };
   return res.render("login.ejs", templateVars);
 });
 
 // to login /login
 app.post("/login", (req, res) => {
-  const id = req.cookies.user_id;
-  if (!id) {
-    return res.send("You need to register!");
-  }
-
   const { email, password } = req.body;
   const { error, data } = authenticateUser(users, email, password);
 
   if (error) {
     // first param is 'username', second param is the value of username
-    return res.status(403).send("email or password is invalid!");
+    return res.status(403).send(error);
   }
 
-  res.cookie("user_id", data.id);
+  req.session.id = data.id;
   return res.redirect("/urls");
 });
 
 // to logout /logout
 app.post("/logout", (req, res) => {
-  // to clear the cookie with using user_id
-  res.clearCookie("user_id");
+  // to clear the cookie with using
+  res.clearCookie("session");
   return res.redirect("/login");
 });
 
 // route for /register
 app.get("/register", (req, res) => {
-  const id = req.cookies.user_id;
+  const id = req.session.id;
   if (id) {
     return res.redirect("/login");
   }
@@ -241,7 +246,7 @@ app.get("/register", (req, res) => {
   // }
 
   // const templateVars = {
-  //   user_id: data.id,
+  //   : data.id,
   // };
 
   return res.render("register");
@@ -271,7 +276,7 @@ app.post("/register", (req, res) => {
   if (newUserResult.error) {
     return res.status(400).send(newUserResult.error);
   }
-  res.cookie("user_id", newUserResult.data.id);
+  req.session.id = newUserResult.data.id;
   return res.redirect("/urls");
 });
 
