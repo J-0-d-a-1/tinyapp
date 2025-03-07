@@ -12,7 +12,7 @@ const {
   authenticateUser,
   urlsForUser,
   checkTheURLExist,
-} = require("./helpers/userHelpers");
+} = require("./helpers");
 
 // telling express app to use ejs as its templating engine
 app.set("view engine", "ejs");
