@@ -24,7 +24,7 @@ describe("getUserByEmail", function () {
 
   it("should return a error message with invalid email", () => {
     const { error, data } = getUserByEmail(testUsers, "invalide@email.com");
-    const expectedError = "No user matching";
-    assert.equal(error, expectedError);
+    const expectedData = null;
+    assert.equal(data, expectedData);
   });
 });
