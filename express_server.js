@@ -14,6 +14,8 @@ const {
   // checkTheURLExist,
 } = require("./helpers");
 
+const { urlDatabase, users } = require("./dataBase");
+
 // telling express app to use ejs as its templating engine
 app.set("view engine", "ejs");
 
@@ -30,24 +32,6 @@ app.use(
     keys: ["This app is created by feature web developer"],
   })
 );
-
-const urlDatabase = {
-  b2xVn2: { longURL: "http://www.lighthouselabs.ca", userID: "userRandomID" },
-  "9sm5xK": { longURL: "http://www.google.com", userID: "userRandomID" },
-};
-
-const users = {
-  userRandomID: {
-    id: "userRandomID",
-    email: "user@example.com",
-    password: "purple-monkey-dinosaur",
-  },
-  user2RandomID: {
-    id: "user2RandomID",
-    email: "user2@example.com",
-    password: "dishwasher-funk",
-  },
-};
 
 // rout for /
 app.get("/", (req, res) => {
