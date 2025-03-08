@@ -59,7 +59,7 @@ app.get("/urls", (req, res) => {
   // res.clearCookie("");
   const id = req.session.id;
   if (!id) {
-    return res.redirect("login");
+    return res.send("You need to loggin or register first!");
   }
   const email = users[id]["email"];
   const { error, data } = getUserByEmail(users, email);
@@ -67,6 +67,7 @@ app.get("/urls", (req, res) => {
   const urls = urlsForUser(urlDatabase, id).data;
   const templateVars = {
     user_id: data.id,
+    user_email: data.email,
     urls,
   };
   return res.render("urls_index", templateVars);
@@ -83,6 +84,7 @@ app.get("/urls/new", (req, res) => {
 
   const templateVars = {
     user_id: data.id,
+    user_email: data.email,
   };
 
   req.session.id = data.id;
@@ -115,6 +117,7 @@ app.get("/urls/:id", (req, res) => {
 
   const templateVars = {
     user_id: data.id,
+    user_email: data.email,
     id,
     longURL: urlDatabase[id].longURL,
   };
@@ -151,7 +154,6 @@ app.post("/urls", (req, res) => {
 
   const newId = generateRandomString();
   urlDatabase[newId] = { longURL: req.body.longURL, userID: data.id };
-  console.log(urlDatabase);
   return res.redirect(`/urls/${newId}`);
 });
 
@@ -171,11 +173,18 @@ app.post("/urls/:id/delete", (req, res) => {
 
 // to edit a url from /urls/:id/edit
 app.post("/urls/:id/edit", (req, res) => {
-  if (!urlDatabase[req.params.id]) {
-    return res.status(404).send("the URL is invalid");
-  }
+  // if (!urlDatabase[req.params.id]) {
+  //   return res.status(404).send("the URL is invalid");
+  // }
 
-  urlDatabase[req.params.id] = req.body[req.params.id];
+  console.log(req.params.id);
+
+  const id = req.params.id;
+  console.log(urlDatabase[req.params.id].longURL);
+  const editedURL = req.body[id];
+  console.log(editedURL);
+
+  urlDatabase[req.params.id].longURL = editedURL;
   return res.redirect("/urls");
 });
 
