@@ -236,16 +236,18 @@ app.get("/register", (req, res) => {
 app.post("/register", (req, res) => {
   //extract email from cookkie
   const { email, password } = req.body;
+  console.log(email, password);
 
   // handling empty field
   if (!email || !password) {
     return res.status(400).send("Email and password are required");
   }
 
-  const result = authenticateUser(users, email, password);
+  const { error, data } = getUserByEmail(users, email);
+  console.log(error, data);
   // handling existing email
-  if (!result.error) {
-    return res.status(400).send("email is already exist!");
+  if (!error) {
+    return res.send("The email is already registered");
   }
 
   const newUserData = { email, password };
