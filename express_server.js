@@ -51,7 +51,13 @@ const users = {
 
 // rout for /
 app.get("/", (req, res) => {
-  return res.send("Hello!");
+  const id = req.session.id;
+
+  if (!id) {
+    return res.redirect("/register");
+  }
+
+  return res.redirect("/login");
 });
 
 // rout for /urls
